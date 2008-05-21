@@ -369,7 +369,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 global cachehandler
 
 PROXIES=None
-HOST_NAME = '0.0.0.0' # The IP Adress to listen on
+HOST_NAME = '127.0.0.1' # The IP Adress to listen on
 PORT_NUMBER = 64652 # The port of the NinjaVideo.net helper
 
 #Change this to:
