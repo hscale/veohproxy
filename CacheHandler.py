@@ -19,7 +19,6 @@ class FileCacheHandler(CacheHandler):
 			pickle.dump(toSave, fh)
 			fh.close()
 		except:
-			traceback.print_exc()
 			try:
 				fh.close()
 			except:
@@ -32,10 +31,8 @@ class FileCacheHandler(CacheHandler):
 			fh=open(self.getFileName(name), "r")
 			a=pickle.load(fh)
 			fh.close()
-			if (a!=None): print "Cache hit."
 			return a
 		except:
-			traceback.print_exc()
 			try:
 				fh.close()
 			except:
@@ -51,9 +48,7 @@ class MemoryCacheHandler(CacheHandler):
 		
 	def getFromCache(self, name):
 		try:
-			if (self.cache[name]!=None): print "Cache hit."
 			return self.cache[name]
 		except:
-			traceback.print_exc()
 			return None
 	

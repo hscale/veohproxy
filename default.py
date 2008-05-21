@@ -81,16 +81,13 @@ class MyHandler(BaseHTTPRequestHandler):
 			a=cachehandler.getFromCache(request)
 			return a
 		except:
-			traceback.print_exc()
 			return None
 	
 	def saveToCache(self, request, what):
-		print "Saving to cache: ", request
 		global cachehandler
 		try:
 			cachehandler.saveToCache(request, what)
 		except:
-			traceback.print_exc()
 			pass
 			
 	"""
@@ -218,9 +215,9 @@ class MyHandler(BaseHTTPRequestHandler):
 				fileout.flush()
 			response.close()
 			fileout.close()
-			print "Closing connection"
+			print time.asctime(),"Closing connection"
 		except socket.error, e:
-			print "Client Closed the connection."
+			print time.asctime(),"Client Closed the connection."
 			try:
 				response.close()
 				fileout.close()
@@ -237,7 +234,6 @@ class MyHandler(BaseHTTPRequestHandler):
 		the_page= self.getHTTPFile(url, [( "User-Agent","NinjaVideoHelper/0.1.4")])
 		the_page=the_page.split("\r\n")
 		params={}
-		print params
 		for s in the_page:
 			try:
 				t=s.split(": ")
@@ -255,7 +251,6 @@ class MyHandler(BaseHTTPRequestHandler):
 		return (params["Location"],size,params["Name"]+".avi",url,"http://p-cache.veoh.com/cache",pieces)
 
 	def getRangeRequest(self, hrange, filesize):
-		print hrange
 		if hrange==None:	
 			hrange=0
 			crange=None

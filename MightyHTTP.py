@@ -96,7 +96,6 @@ class HTTPRangeHandler(urllib.FancyURLopener):
 class HTTPSRangeHandler(HTTPRangeHandler):
 	""" Range Header support for HTTPS. """
 	def https_error_206(self, req, fp, code, msg, hdrs):
-		print "Got 206/partial content"
 		return self.http_error_206(req, fp, code, msg, hdrs)
 
 	def https_error_416(self, req, fp, code, msg, hdrs):
