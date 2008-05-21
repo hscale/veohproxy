@@ -60,6 +60,7 @@ class MyHandler(BaseHTTPRequestHandler):
 	def answer_request(s, sendData):
 		try:
 			request_path=s.path[1:]
+			request_path=re.sub(r"\?.*","",request_path)
 			requestedRange=s.headers.getheader("Range")
 			if request_path=="stop":
 				sys.exit()
