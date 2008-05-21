@@ -6,11 +6,14 @@ class CacheHandler:
 		return 0
 
 class FileCacheHandler(CacheHandler):
+	def __init__(self):
+		self.cache={}
+		self.path=sys.path[0]
+
 	def getFileName(self, name):
 		import os
 		import sys
-		return os.path.join(sys.path[0],name) +".vp"
-		
+		return os.path.join(self.path,name) +".vp"
 		
 	def saveToCache(self, name, toSave):
 		try:
