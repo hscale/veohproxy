@@ -103,7 +103,7 @@ class MyHandler(BaseHTTPRequestHandler):
 			(myFileHash,myFileSize,myFileName,myParthHashFile,myUrlRoot,hashes)=s.getVeohParams(request_path)
 			s.saveToCache(request_path, (myFileHash,myFileSize,myFileName,myParthHashFile,myUrlRoot,hashes))
 		range=s.headers.getheader("Range")
-		(hrange, crange)=s.getRangeRequest(hrange, myFileSize)
+		(hrange, crange)=s.getRangeRequest(range, myFileSize)
 		mtype="application/x-msvideo"
 		# Do we have to send a normal response or a range response?
 		if range!=None:
@@ -383,6 +383,7 @@ if __name__ == '__main__':
 	server_class = ThreadedHTTPServer
 	httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
 	print time.asctime(), "VeohProxy Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
-	httpd.serve_forever()
+	while(True):
+		httpd.handle_request()
 	httpd.server_close()
 	print time.asctime(), "VeohProxy Stops %s:%s" % (HOST_NAME, PORT_NUMBER)
