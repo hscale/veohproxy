@@ -165,7 +165,7 @@ class MyHandler(BaseHTTPRequestHandler):
 			range=s.headers.getheader("Range")
 			contentsize=s.getHTTPFileSize(steamplugURL, [])
 			(hrange, crange)=s.getRangeRequest(range, contentsize);
-			contenttype="application/x-msvideo"
+			contenttype="video/x-msvideo"
 			if range!=None:
 				s.send_response(206)
 				s.send_header("Content-Range",crange)
@@ -315,52 +315,61 @@ class MyHandler(BaseHTTPRequestHandler):
 
 	def sendVeoh(self,fileout,hashes,urlroot,filehash,start):
 		piece=0
-		try:
-			print time.asctime(), "Starting download at byte ",start
-			# One full chunk is 256*1024 bytes long
-			myResumeCount = start/(256*1024)
-			myResumeRest = start%(256*1024)
-			for id in hashes:
-				if piece>=myResumeCount:
-					piece=piece+1
-					# We don't want that piece, so skip it.		
-					url=urlroot+"/get.jsp?fileHash="+filehash+"&pieceHash="+id
+		print time.asctime(), "Starting download at byte ",start
+		# One full chunk is 256*1024 bytes long
+		myResumeCount = start/(256*1024)
+		myResumeRest = start%(256*1024)
+		for id in hashes:
+			if piece>=myResumeCount:
+				piece=piece+1
+				# We don't want that piece, so skip it.		
+				url=urlroot+"/get.jsp?fileHash="+filehash+"&pieceHash="+id
+				happy=0
+				trycount=0
+				while not happy and trycount<20:
 					try:
+						trycount=trycount+1
 						filein = urllib.urlopen(url,proxies=PROXIES)
 						buf=filein.read()
-						if (myResumeRest>0):
-							buf=buf[myResumeRest:]
-							myResumeRest=0
-						fileout.write(buf)
-						fileout.flush()
-						filein.close()
-						del buf
-					except socket.error, e:
-							try:
-								filein.close()
-								fileout.close()
-							except Exception, e:
-								pass
-							print "Client Closed the connection."
-							return
-					except Exception, inst:
-							print time.asctime(), "Some weird error happened."
-							try:
-								filein.close()
-							except Exception, e:
-								pass
-							raise inst
-					try:
-						filein.close()
+						if (piece<len(hashes)-1) and len(buf)<256*1024:
+							raise Exception(-1,"Error: Content too short.")
+						happy=1
 					except:
-						pass
-				else:
-					piece=piece+1
-		except Exception,e:
-			(errno, strerror)=inst
-			if not errno==104:
-				traceback.print_exc(file=sys.stdout)
-			raise e
+						try:
+							filein.close()
+						except:
+							pass
+						print time.asctime(),"Could not read from URL...reopening..."
+				try:
+					if (myResumeRest>0):
+						buf=buf[myResumeRest:]
+						myResumeRest=0
+					fileout.write(buf)
+					fileout.flush()
+					filein.close()
+					del buf
+				except socket.error, e:
+						try:
+							filein.close()
+							fileout.close()
+						except Exception, e:
+							pass
+						print "Client Closed the connection."
+						return
+				except Exception, inst:
+						print time.asctime(), "Some weird error happened."
+						traceback.print_exc()
+						try:
+							filein.close()
+						except Exception, e:
+							pass
+						raise inst
+				try:
+					filein.close()
+				except:
+					pass
+			else:
+				piece=piece+1
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 	"""Handle requests in a separate thread."""
@@ -379,7 +388,7 @@ PORT_NUMBER = 64652 # The port of the NinjaVideo.net helper
 cachehandler=MemoryCacheHandler()
 
 if __name__ == '__main__':	
-	socket.setdefaulttimeout(80000)
+	socket.setdefaulttimeout(3)
 	server_class = ThreadedHTTPServer
 	httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
 	print time.asctime(), "VeohProxy Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
