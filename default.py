@@ -371,7 +371,25 @@ class MyHandler(BaseHTTPRequestHandler):
 			else:
 				piece=piece+1
 
-class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+
+class Server(HTTPServer):
+    """HTTPServer class with timeout."""
+
+    def get_request(self):
+        """Get the request and client address from the socket."""
+        # 10 second timeout
+        self.socket.settimeout(5.0)
+        result = None
+        while result is None:
+            try:
+                result = self.socket.accept()
+            except socket.timeout:
+                pass
+        # Reset timeout on the new socket
+        result[0].settimeout(1000)
+        return result
+
+class ThreadedHTTPServer(ThreadingMixIn, Server):
 	"""Handle requests in a separate thread."""
 
 
@@ -388,7 +406,7 @@ PORT_NUMBER = 64652 # The port of the NinjaVideo.net helper
 cachehandler=MemoryCacheHandler()
 
 if __name__ == '__main__':	
-	socket.setdefaulttimeout(3)
+	socket.setdefaulttimeout(5)
 	server_class = ThreadedHTTPServer
 	httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
 	print time.asctime(), "VeohProxy Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
