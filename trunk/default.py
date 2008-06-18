@@ -231,25 +231,25 @@ class MyHandler(BaseHTTPRequestHandler):
 
 	def getNinja(self,id):
 		print time.asctime(), "Getting infos from NinjaVideo.net for Video ID ",id,"..."
-		url="http://www.ninjavideo.net/ninjaserver.php?requestid="+str(id)
-		the_page= self.getHTTPFile(url, [( "User-Agent","NinjaVideoHelper/0.1.4")])
-		the_page=the_page.split("\r\n")
+		url="http://www.ninjavideo.net/server.php?request="+str(id)
+		the_page= self.getHTTPFile(url, [( "User-Agent","NinjaVideo Helper/0.2.0")])
+		pardata=the_page.split("\r\n")
+		print pardata
 		params={}
-		for s in the_page:
+		for s in pardata:
 			try:
 				t=s.split(": ")
 				params[t[0]]=t[1]
 			except:
 				pass
-		if params["Method"]!="veoh":
-			print time.asctime(), "Could not obtain NinjaVideo information."
+		if params["Method"]!="ninjaveoh":
+			print time.asctime(), "Could not obtain NinjaVideo information - Unknown Method."
 			return
-		url="http://p-cache.veoh.com/cache/veoh/"+params["Location"]+".veoh"
-		data=self.getHTTPFile(url, [])
+		data=the_page
 		size=re.search(r"<file\ .+?size\=\'(.+?)\'", data).group(1)
 		resp=re.search(r"<file\ .+?>(.+?)</file>",data,re.DOTALL).group(0)
 		pieces=re.findall(r"<piece\ id\=\'(.+?)\'", resp)
-		return (params["Location"],size,params["Name"]+".avi",url,"http://p-cache.veoh.com/cache",pieces)
+		return (params["Data"],size,params["Name"]+".avi",url,"http://p-cache.veoh.com/cache",pieces)
 
 	def getRangeRequest(self, hrange, filesize):
 		if hrange==None:	
@@ -398,7 +398,7 @@ global cachehandler
 
 PROXIES=None
 HOST_NAME = '127.0.0.1' # The IP Adress to listen on
-PORT_NUMBER = 64652 # The port of the NinjaVideo.net helper
+PORT_NUMBER = 64653 # The port of the NinjaVideo.net helper
 
 #Change this to:
 #cachehandler=FileCacheHandler()
@@ -406,7 +406,7 @@ PORT_NUMBER = 64652 # The port of the NinjaVideo.net helper
 cachehandler=MemoryCacheHandler()
 
 if __name__ == '__main__':	
-	socket.setdefaulttimeout(5)
+	socket.setdefaulttimeout(10)
 	server_class = ThreadedHTTPServer
 	httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
 	print time.asctime(), "VeohProxy Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
