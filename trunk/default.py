@@ -232,7 +232,7 @@ class MyHandler(BaseHTTPRequestHandler):
 	def getNinja(self,id):
 		print time.asctime(), "Getting infos from NinjaVideo.net for Video ID ",id,"..."
 		url="http://www.ninjavideo.net/server.php?request="+str(id)
-		the_page= self.getHTTPFile(url, [( "User-Agent","NinjaVideo Helper/0.2.0")])
+		the_page= self.getHTTPFile(url, [( "User-Agent","NinjaVideo Helper/0.2.4")])
 		pardata=the_page.split("\r\n")
 		print pardata
 		params={}
@@ -243,6 +243,7 @@ class MyHandler(BaseHTTPRequestHandler):
 			except:
 				pass
 		if params["Method"]!="ninjaveoh":
+			print params
 			print time.asctime(), "Could not obtain NinjaVideo information - Unknown Method."
 			return
 		data=the_page
@@ -299,7 +300,10 @@ class MyHandler(BaseHTTPRequestHandler):
 
 	def sendHeaders(s, filename, contenttype, contentsize , etag):
 		print time.asctime(), "Sending headers..."
-		s.send_header("Content-Disposition", "inline; filename=\""+filename.encode('iso-8859-1', 'replace')+"\"")
+		try:
+			s.send_header("Content-Disposition", "inline; filename=\""+filename.encode('iso-8859-1', 'replace')+"\"")
+		except:
+			pass
 		s.send_header("Content-type", contenttype)
 		s.send_header("Last-Modified","Wed, 21 Feb 2000 08:43:39 GMT")
 		s.send_header("ETag",etag)
