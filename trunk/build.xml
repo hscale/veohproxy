@@ -3,6 +3,7 @@
 	<taskdef name="nsis" classname="net.sf.nsisant.Task" />
 	<taskdef name="py-run" classname="org.pyant.tasks.PythonRunTask" />
 
+	<property name="veohproxy.version" value="1.5"/>
     <property name="src.dir" value="src"/>
 	<property name="nsis.dir" value="C:\Program Files\NSIS\"/>
 	<property name="python.dir" value="C:\PYTHON25\python.exe"/>
@@ -25,15 +26,29 @@
                 <include name="${src.dir}/build"/>
             	<include name="installer/build.log"/>
             	<include name="installer/setup.exe"/>
+            	<include name="installer/veohproxy-${veohproxy.version}-src.zip"/>
+            	<include name="installer/veohproxy-${veohproxy.version}-setup-win.exe"/>
             </fileset>
         </delete>
     </target>
     
-    <target name="py2exe">
+    <target name="py2exe" depends="init">
     	   <echo message="${python.dir}"/>
     	   <py-run script="src\veohProxy2Exe.py" dir="${src.dir}" python="${python.dir}">
     	      <arg value='py2exe' />
     	   </py-run>
     </target>
+	
+	<target name="createpackages" depends="build_installer">
+		<delete includeemptydirs="true">
+		            <fileset dir=".">
+		                <include name="${src.dir}/build/**"/>
+		            </fileset>
+			</delete>
+		  <zip destfile="installer/veohproxy-${veohproxy.version}-src.zip">
+		    <zipfileset dir="src" includes="**/*.py" excludes="veohProxy2Exe.py" prefix="VeohProxy-${veohproxy.version}"/>
+		  </zip>
+		  <copy file="installer\setup.exe" tofile="installer\veohproxy-${veohproxy.version}-setup-win.exe"/>
+	</target>
  
 </project>
