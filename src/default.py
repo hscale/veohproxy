@@ -412,7 +412,7 @@ if __name__ == '__main__':
 	socket.setdefaulttimeout(10)
 	server_class = ThreadedHTTPServer
 	httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
-	print time.asctime(), "VeohProxy Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
+	print time.asctime(), "VeohProxy Starts - %s:%" % (HOST_NAME, PORT_NUMBER)
 	while(True):
 		httpd.handle_request()
 	httpd.server_close()

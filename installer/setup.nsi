@@ -71,7 +71,7 @@ Section -Main SEC0000
     File ..\build\MSVCR71.dll
     File ..\build\python25.dll
     File ..\build\unicodedata.pyd
-    File ..\build\VeohProxy.ico
+    File ..\res\VeohProxy.ico
     File ..\build\w9xpopen.exe
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut $SMPROGRAMS\$StartMenuGroup\VeohProxy.lnk $INSTDIR\default.exe

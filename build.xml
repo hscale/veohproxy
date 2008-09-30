@@ -1,0 +1,33 @@
+<project name="VeohProxy" default="build_installer">
+    <taskdef name="nsis" classname="net.sf.nsisant.Task" />
+	<taskdef name="py-run" classname="org.pyant.tasks.PythonRunTask" />
+
+    <property name="src.dir" value="src"/>
+	<property name="nsis.dir" value="C:\Program Files\NSIS\"/>
+	<property name="python.dir" value="C:\PYTHON25\python.exe"/>
+
+	<target name="init" depends="clean">
+    </target>
+	
+	<target name="build_installer" depends="py2exe">
+		  <nsis path="${nsis.dir}" script="installer\setup.nsi" verbosity="4" out="installer\build.log" noconfig="yes"/>
+	</target>
+	    
+    <target name="clean">
+        <delete>
+            <fileset dir="${src.dir}">
+                <include name="**/*.pyc"/>
+                <include name="**/*.pyo"/>
+            	<include name="build/**"/>
+            </fileset>
+        </delete>
+    </target>
+    
+    <target name="py2exe">
+    	   <echo message="${python.dir}"/>
+    	   <py-run script="src\veohProxy2Exe.py" dir="${src.dir}" pythonpath="${src.dir}" python="${python.dir}">
+    	      <arg value='py2exe' />
+    	   </py-run>
+    </target>
+ 
+</project>
