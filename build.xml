@@ -1,5 +1,6 @@
 <project name="VeohProxy" default="build_installer">
-    <taskdef name="nsis" classname="net.sf.nsisant.Task" />
+	
+	<taskdef name="nsis" classname="net.sf.nsisant.Task" />
 	<taskdef name="py-run" classname="org.pyant.tasks.PythonRunTask" />
 
     <property name="src.dir" value="src"/>
@@ -14,11 +15,16 @@
 	</target>
 	    
     <target name="clean">
-        <delete>
-            <fileset dir="${src.dir}">
-                <include name="**/*.pyc"/>
-                <include name="**/*.pyo"/>
+        <delete includeemptydirs="true">
+            <fileset dir=".">
+                <include name="${src.dir}/*.pyc"/>
+                <include name="${src.dir}/*.pyo"/>
             	<include name="build/**"/>
+            	<include name="${src.dir}/build/**"/>
+                <include name="build"/>
+                <include name="${src.dir}/build"/>
+            	<include name="installer/build.log"/>
+            	<include name="installer/setup.exe"/>
             </fileset>
         </delete>
     </target>
