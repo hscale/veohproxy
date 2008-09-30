@@ -31,7 +31,7 @@
     
     <target name="py2exe">
     	   <echo message="${python.dir}"/>
-    	   <py-run script="src\veohProxy2Exe.py" dir="${src.dir}" pythonpath="${src.dir}" python="${python.dir}">
+    	   <py-run script="src\veohProxy2Exe.py" dir="${src.dir}" python="${python.dir}">
     	      <arg value='py2exe' />
     	   </py-run>
     </target>
