@@ -196,7 +196,7 @@ class MyHandler(BaseHTTPRequestHandler):
 		
 	def getVeohParams(self, veohID):
 		print time.asctime(), "Getting information about file from Veoh..."
-		url = 'http://www.veoh.com/service/getMediaInfo.xml'
+		url = 'http://www.veoh.com/service/getMediaInfo.xml?clientGUID=""&version="3.0.0"'
 		data='<MediaIdList><MediaId permalinkId="'+veohID+'"/></MediaIdList>'
 		response = self.getHTTPFile(url, [('User-Agent','veoh-3.2.0 service (NT 5.1; IE 6.0.2900.2180; en-US Windows;'),( "Content-Type","application/xml")], data=data)
 		return self.get_info(veohID,response)
@@ -242,7 +242,6 @@ class MyHandler(BaseHTTPRequestHandler):
 			except:
 				pass
 		if params["Method"]!="ninjaveoh":
-			print params
 			print time.asctime(), "Could not obtain NinjaVideo information - Unknown Method."
 			return
 		data=the_page
@@ -299,10 +298,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
 	def sendHeaders(s, filename, contenttype, contentsize , etag):
 		print time.asctime(), "Sending headers..."
-		try:
-			s.send_header("Content-Disposition", "inline; filename=\""+filename.encode('iso-8859-1', 'replace')+"\"")
-		except:
-			pass
+		s.send_header("Content-Disposition", "inline; filename=\""+filename.encode('iso-8859-1', 'replace')+"\"")
 		s.send_header("Content-type", contenttype)
 		s.send_header("Last-Modified","Wed, 21 Feb 2000 08:43:39 GMT")
 		s.send_header("ETag",etag)
