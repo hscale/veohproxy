@@ -234,7 +234,6 @@ class MyHandler(BaseHTTPRequestHandler):
 		url="http://www.ninjavideo.net/server.php?request="+str(id)
 		the_page= self.getHTTPFile(url, [( "User-Agent","NinjaVideo Helper/0.2.4")])
 		pardata=the_page.split("\r\n")
-		print pardata
 		params={}
 		for s in pardata:
 			try:
