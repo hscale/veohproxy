@@ -3,7 +3,7 @@
 	<taskdef name="nsis" classname="net.sf.nsisant.Task" />
 	<taskdef name="py-run" classname="org.pyant.tasks.PythonRunTask" />
 
-	<property name="veohproxy.version" value="1.5"/>
+	<property name="veohproxy.version" value="1.51"/>
     <property name="src.dir" value="src"/>
 	<property name="nsis.dir" value="C:\Program Files\NSIS\"/>
 	<property name="python.dir" value="C:\PYTHON25\python.exe"/>

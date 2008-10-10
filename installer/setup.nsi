@@ -7,7 +7,7 @@ RequestExecutionLevel admin
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 1.5
+!define VERSION 1.51
 !define COMPANY "Torben Gerkensmeyer"
 !define URL http://code.google.com/p/veohproxy
 

@@ -241,10 +241,16 @@ class MyHandler(BaseHTTPRequestHandler):
 				params[t[0]]=t[1]
 			except:
 				pass
-		if params["Method"]!="ninjaveoh":
-			print time.asctime(), "Could not obtain NinjaVideo information - Unknown Method."
-			return
-		data=the_page
+                if params["Method"]!="ninjaveoh":
+                        #patch by mortael on xbmc forums:http://xbmc.org/forum/showthread.php?t=33701&page=26 . Thanks!
+                        if params["Method"]!="std":
+                                print time.asctime(), "Could not obtain NinjaVideo information - Unknown Method."
+                                return
+                        print time.asctime(), "Not a normal Veoh vid, but a 301 redirect to " + params["Data"]
+                        self.send_response(301)
+                        self.send_header("Location",params["Data"])
+                        self.end_headers()
+                data=the_page
 		size=re.search(r"<file\ .+?size\=\'(.+?)\'", data).group(1)
 		resp=re.search(r"<file\ .+?>(.+?)</file>",data,re.DOTALL).group(0)
 		pieces=re.findall(r"<piece\ id\=\'(.+?)\'", resp)
@@ -298,7 +304,10 @@ class MyHandler(BaseHTTPRequestHandler):
 
 	def sendHeaders(s, filename, contenttype, contentsize , etag):
 		print time.asctime(), "Sending headers..."
-		s.send_header("Content-Disposition", "inline; filename=\""+filename.encode('iso-8859-1', 'replace')+"\"")
+		try:
+			s.send_header("Content-Disposition", "inline; filename=\""+filename.encode('iso-8859-1', 'replace')+"\"")
+		except:
+			pass
 		s.send_header("Content-type", contenttype)
 		s.send_header("Last-Modified","Wed, 21 Feb 2000 08:43:39 GMT")
 		s.send_header("ETag",etag)
