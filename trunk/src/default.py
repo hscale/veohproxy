@@ -159,7 +159,7 @@ class MyHandler(BaseHTTPRequestHandler):
 		(myFileHash,myFileSize,myFileName,myParthHashFile,myUrlRoot,hashes)=s.get_info(request_path,response)
 		hashfile =s.getHTTPFile(myParthHashFile, [])
 		response=response+hashfile
-		contenttype="application/xml"
+		contenttype="application/octet-stream"
 		# Do we have to send a normal response or a range response?
 		s.send_response(200)
 		etag=s.generateETag(request_path)
