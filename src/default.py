@@ -66,6 +66,10 @@ class MyHandler(BaseHTTPRequestHandler):
 				sys.exit()
 			elif request_path[0:11]=="streamplug/":
 				s.serveStreamplug(request_path[11:], sendData)
+			elif request_path[0:22]=="generateVideoInfoFile/":
+				s.serveVideoInfoFile(request_path[22:], requestedRange, sendData)
+			elif request_path[0:18]=="fromVideoInfoFile/":
+				s.serveFromVideoInfoFile(request_path[18:], requestedRange, sendData)
 			elif request_path[0]!='v' or len(request_path)<10 and re.match('[0-9]*$', requested_path)!=None:
 				s.serveNinjaVideo(request_path, requestedRange, sendData)
 			elif request_path[0]=='v':
@@ -90,10 +94,8 @@ class MyHandler(BaseHTTPRequestHandler):
 			cachehandler.saveToCache(request, what)
 		except:
 			pass
-			
 	"""
-	Serves a video residing on Veoh. request_path has to be a veoh id. Range is the first byte to be served. First grabs
-	the infos about the part-files from veoh, then sends data using sendVeoh().
+	Serves a video info file storing all the parts information. 
 	"""
 	def serveVeohVideo(s, request_path, range, sendData):
 		cached=s.getFromCache(request_path)
@@ -116,6 +118,64 @@ class MyHandler(BaseHTTPRequestHandler):
 		s.sendHeaders(myFileName, mtype, contentsize , etag)
 		if (sendData):
 			s.sendVeoh(s.wfile, hashes,myUrlRoot,myFileHash,hrange)
+	
+	"""
+	Serves a veoh video from a video info file storing all the parts information. request_path has to be a base64-encoded url to a video info file. 
+	"""
+	def serveFromVideoInfoFile(s, request_path, range, sendData):
+		(requestedURL,filename)=s.decodeB64URL(request_path)
+		print requestedURL
+		try:
+			resp=s.getHTTPFile(requestedURL,[])
+		except:
+			print time.asctime(), "Error retrieving video info file."
+			return
+		(myFileHash,myFileSize,myFileName,myParthHashFile,myUrlRoot,hashes)=s.get_info(requestedURL,resp)
+		range=s.headers.getheader("Range")
+		(hrange, crange)=s.getRangeRequest(range, myFileSize)
+		mtype="application/x-msvideo"
+		# Do we have to send a normal response or a range response?
+		if range!=None:
+			s.send_response(206)
+			s.send_header("Content-Range",crange)
+		else:
+			s.send_response(200)
+		contentsize=int(myFileSize)-hrange
+		etag=s.generateETag(request_path)
+		s.sendHeaders(myFileName, mtype, contentsize , etag)
+		if (sendData):
+			s.sendVeoh(s.wfile, hashes,myUrlRoot,myFileHash,hrange)		
+			
+	"""
+	Serves a video info file for a video residing on Veoh. request_path has to be a veoh id. Range is the first byte to be served. First grabs
+	the infos about the part-files from veoh and serves this info as a file.
+	"""
+	def serveVideoInfoFile(s, request_path, range, sendData):
+		cached=s.getFromCache(request_path)
+		print time.asctime(), "Getting information about file from Veoh..."
+		url = 'http://www.veoh.com/service/getMediaInfo.xml?clientGUID=""&version="3.0.0"'
+		data='<MediaIdList><MediaId permalinkId="'+request_path+'"/></MediaIdList>'
+		response = s.getHTTPFile(url, [('User-Agent','veoh-3.2.0 service (NT 5.1; IE 6.0.2900.2180; en-US Windows;'),( "Content-Type","application/xml")], data=data)
+		contenttype="application/octetstream"
+		# Do we have to send a normal response or a range response?
+		s.send_response(200)
+		etag=s.generateETag(request_path)
+		myFileName=request_path+".vidInf"
+		print time.asctime(), "Sending headers..."
+		try:
+			s.send_header("Content-Disposition", "attachment; filename=\""+myFileName.encode('iso-8859-1', 'replace')+"\"")
+		except:
+			pass
+		s.send_header("Content-type", contenttype)
+		s.send_header("Cache-Control","no-cache")
+		s.send_header("Pragma","no-cache")
+		s.send_header("Content-Length", str(len(response)))
+		s.end_headers()
+		
+		if (sendData):
+			s.wfile.write(response)
+			s.wfile.flush()
+			s.wfile.close()
 		
 	"""
 	Serves a request of a ninjavideo.net url.
