@@ -130,7 +130,7 @@ class MyHandler(BaseHTTPRequestHandler):
 		except:
 			print time.asctime(), "Error retrieving video info file."
 			return
-		(myFileHash,myFileSize,myFileName,myParthHashFile,myUrlRoot,hashes)=s.get_info(requestedURL,resp)
+		(myFileHash,myFileSize,myFileName,myParthHashFile,myUrlRoot,hashes)=s.get_vidInfoFileInfo(requestedURL,resp)
 		range=s.headers.getheader("Range")
 		(hrange, crange)=s.getRangeRequest(range, myFileSize)
 		mtype="application/x-msvideo"
@@ -156,7 +156,10 @@ class MyHandler(BaseHTTPRequestHandler):
 		url = 'http://www.veoh.com/service/getMediaInfo.xml?clientGUID=""&version="3.0.0"'
 		data='<MediaIdList><MediaId permalinkId="'+request_path+'"/></MediaIdList>'
 		response = s.getHTTPFile(url, [('User-Agent','veoh-3.2.0 service (NT 5.1; IE 6.0.2900.2180; en-US Windows;'),( "Content-Type","application/xml")], data=data)
-		contenttype="application/octetstream"
+		(myFileHash,myFileSize,myFileName,myParthHashFile,myUrlRoot,hashes)=s.get_info(request_path,response)
+		hashfile =s.getHTTPFile(myParthHashFile, [])
+		response=response+hashfile
+		contenttype="application/xml"
 		# Do we have to send a normal response or a range response?
 		s.send_response(200)
 		etag=s.generateETag(request_path)
@@ -216,6 +219,18 @@ class MyHandler(BaseHTTPRequestHandler):
 		hashfile =s.getHTTPFile(info["PieceHashFile"], [])
 		pieces=s.get_piece_info(hashfile)
 		return (info["FileHash"],info["Size"],info["Title"]+info["Extension"],info["PieceHashFile"],info["UrlRoot"],pieces)
+	
+	def get_vidInfoFileInfo(s, vid,data):
+		info={'vid':vid}
+		resp=re.search(r"<Response>(.+?)</Response>",data,re.DOTALL).group(1)
+		resp=re.search(r"<QueueEntry>(.+?)</QueueEntry>",resp,re.DOTALL).group(1)
+		resp=re.search(r"<Video>(.+?)</Video>",resp,re.DOTALL).group(1)
+		for i in ('FileHash', 'Size', 'Title', 'Extension', 'Duration', 'PieceHashFile','UrlRoot'):
+			result = re.search(r"<"+i+r">(.+?)</"+i+r">",resp,re.DOTALL).group(1)
+			info[i] = result.strip()
+		pieces=s.get_piece_info(data)
+		return (info["FileHash"],info["Size"],info["Title"]+info["Extension"],info["PieceHashFile"],info["UrlRoot"],pieces)
+
 
 	"""
 	Sends the requested streamplug movie. RequestedURL is base64-encoded string carrying the url.
@@ -477,6 +492,8 @@ if __name__ == '__main__':
 	socket.setdefaulttimeout(10)
 	server_class = ThreadedHTTPServer
 	httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
+	print time.asctime(), "VeohProxy, Version 1.6.0"
+	print time.asctime(), "VeohProxy is open source software. Get the source code at http://code.google.com/p/veohproxy"
 	print time.asctime(), "VeohProxy Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
 	while(True):
 		httpd.handle_request()
